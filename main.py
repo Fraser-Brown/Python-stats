@@ -3,13 +3,13 @@ from plotter import *
 
 cr = CensusReader("data/CometLanding.csv")
 retweets = cr.retweetCount()
-replys = cr.replyCount()
+replies = cr.replyCount()
 tweets = cr.tweetCount()
 
 # print("retweets:")
 # print(retweets)
-# print("replys:")
-# print(replys)
+# print("replies:")
+# print(replies)
 # print("tweets:")
 # print(tweets)
 # print("Number of Users:")
@@ -18,5 +18,5 @@ tweets = cr.tweetCount()
 
 plotter = Plotter()
 # plotter.tweetsTimeLine(cr.data)
-# plotter.structurePlot(tweets, retweets, replys)
+# plotter.structurePlot(tweets, retweets, replies)
 plotter.hashTagesWordCloud(cr.data)
