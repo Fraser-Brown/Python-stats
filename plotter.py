@@ -9,12 +9,12 @@ from matplotlib import ticker
 
 class Plotter:
 
-    def structurePlot(self, tweets, retweets, replys):
+    def structurePlot(self, tweets, retweets, replies):
         matplotlib.style.use('ggplot')
 
-        total = tweets + retweets + replys
-        labels = 'Tweets', 'ReTweets', 'Replys'
-        sizes = [(tweets/total) * 100, (retweets/total) * 100, (replys/total) * 100]
+        total = tweets + retweets + replies
+        labels = 'Tweets', 'Retweets', 'Replies'
+        sizes = [(tweets/total) * 100, (retweets/total) * 100, (replies/total) * 100]
 
         fig1, ax1 = plt.subplots()
         ax1.pie(sizes, labels=labels, autopct='%1.1f%%',shadow=True, startangle=90)
@@ -40,6 +40,8 @@ class Plotter:
         ax.xaxis.set_ticks(np.arange(start, end, 300))
         ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%0.1f'))
         ax.set_xticklabels(xticks, rotation='vertical', fontsize=8)
+        ax.set_xlabel('Time and Date')
+        ax.set_ylabel('Number of Tweets')
         plt.show()
 
     def hashTagesWordCloud(self, data):
