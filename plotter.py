@@ -28,7 +28,7 @@ class Plotter:
         count = 0
         num = [] #number of tweets
         xticks = []
-        for i, v in time.items():
+        for i, v in time.iteritems():
             count += 1
             num.append(v)
             xticks.append(i)

@@ -37,7 +37,7 @@ class CensusReader:
     def retweetCount(self):
         texts = self.data.loc[:,"text"]
         counts = 0
-        for i, v in texts.items():
+        for i, v in texts.iteritems():
             if type(v) is not str:
                 continue
             if(v[0:4] == "RT @"):
