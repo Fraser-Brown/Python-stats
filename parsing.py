@@ -45,30 +45,16 @@ class CensusReader:
                 print("Refined data can be found in \'" + newFileName + "\'.")
 
     def retweetCount(self):
-        texts = self.data.loc[:,"text"]
-        counts = 0
-        for v in texts.iteritems():
-            if type(v) is not str:
-                continue
-            if(v[0:4] == "RT @"):
-                counts += 1
-        return counts
+        return (self.data['text'].str.startswith("RT")).sum()
 
     def replyCount(self):
-        replytweets = self.data.loc[:, "in_reply_to_screen_name"]
-        counts = 0
-        for v in replytweets:
-            if type(v) is str:
-                counts += 1
-        return counts
+        return (self.data['in_reply_to_screen_name'].notnull()).sum()
 
     def tweetCount(self):
-        result = len(self.data.loc[:, 'entities_str']) - self.replyCount() - self.retweetCount()
-        return result
+        return len(self.data['entities_str'].notnull()) - self.replyCount() - self.retweetCount()
 
     def userCount(self):
-        tweetsWithUniqueUsers = self.data.drop_duplicates(subset=['from_user_id_str'])
-        return len(tweetsWithUniqueUsers)
+        return len(self.data.drop_duplicates(subset=['from_user_id_str']))
     
     def getHashTags(self):
         #     hashtags = self.data.groupby('entities_str').count().sort_values(by=['id_str'], ascending=False).head(number)
