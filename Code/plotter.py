@@ -6,15 +6,9 @@ import numpy as np
 import ipywidgets
 from matplotlib import ticker
 import networkx as nx
+from pandas import DataFrame
 
 class Plotter:
-
-    def removeDuplicates(self, seq):
-        # Not order preserving
-        keys = {}
-        for e in seq:
-            keys[e] = 1
-        return keys.keys()
 
     def pieChart(self, tweets, retweets, replies):
         total = tweets + retweets + replies
@@ -147,38 +141,44 @@ class Plotter:
     
     def repliesToTwoUsers(self, data):
         interactions = []
-        for interaction in data:
-            sentBy = interaction['from_user']
-            inReplyTo = interaction['in_reply_to_screen_name']
+        for index, row in data.iterrows():
+            sentBy = row['from_user']
+            inReplyTo = row['in_reply_to_screen_name']
+            if sentBy == None or inReplyTo == None or type(sentBy) != str or type(inReplyTo) != str: continue
             interactions.append([sentBy, inReplyTo])
-        return self.removeDuplicates(sorted(interactions, reverse=False))
+        return DataFrame(interactions).drop_duplicates()
 
     def retweetsToTwoUsers(self, data):
         interactions = []
-        for interaction in data:
-            sentBy = interaction['from_user']
-            inReplyTo = interaction['entities_str']['user_mentions'][0]['screen_name']
-            interactions.append([sentBy, inReplyTo])
-        return self.removeDuplicates(sorted(interactions, reverse=False))
+        for index, row in data.iterrows():
+            sentBy = row['from_user']
+            tweetText = row['text']
+
+            if sentBy == None or tweetText == None or type(tweetText) != str or type(sentBy) != str: continue
+            splitText = tweetText.split()
+            if len(splitText) < 2: continue
+            
+            retweeting = splitText[1].replace(":", "").replace("@", "")
+            interactions.append([sentBy, retweeting])
+
+        return DataFrame(interactions).drop_duplicates()
     
     def getInteractionUsers(self, data):
-        # given list of tweets
-        # return list of interactions as 2d array
-        # each item contains the 2 users involved in the interaction
-        replies = data[data['in_reply_to_screen_name'].notnull() == True]
+        replies = data[data['in_reply_to_screen_name'].notnull()]
         retweets = data[data['text'].str.startswith("RT") == True]
-        formattedRetweets = self.retweetsToTwoUsers(sorted(retweets, reverse=False))
-        formattedReplies = self.repliesToTwoUsers(sorted(replies, reverse=False))
-        return self.removeDuplicates(sorted(formattedReplies + formattedRetweets, reverse=False))
+
+        formattedRetweets = self.retweetsToTwoUsers(retweets)
+        formattedReplies = self.repliesToTwoUsers(replies)
+
+        all = formattedReplies + formattedRetweets
+        return DataFrame(all).drop_duplicates()
     
     def networkGraph(self, data):
-        # draw each user as a node, each interaction as an edge; eliminate non-interacting users
-        print("I'm a graph lol\n\n")
         G = nx.DiGraph()
         interactionUsers = self.getInteractionUsers(data)
 
-        for twoUsers in interactionUsers:
-            G.add_edge(twoUsers[0], twoUsers[1])
+        for index, row in data.iterrows():
+            G.add_edge(row[0], row[1])
         UG = G.to_undirected()
 
         options = {
