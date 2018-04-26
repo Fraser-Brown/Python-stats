@@ -63,7 +63,7 @@ class CensusReader:
         return counts
 
     def tweetCount(self):
-        result = len(self.data.loc[:, 'entities_str'])
+        result = len(self.data.loc[:, 'entities_str']) - self.replyCount() - self.retweetCount()
         return result
 
     def userCount(self):

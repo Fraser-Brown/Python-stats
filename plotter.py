@@ -9,18 +9,47 @@ from matplotlib import ticker
 
 class Plotter:
 
-    def structurePlot(self, tweets, retweets, replies):
-        matplotlib.style.use('ggplot')
-
+    def pieChart(self, tweets, retweets, replies):
         total = tweets + retweets + replies
-        labels = 'Tweets', 'Retweets', 'Replies'
-        sizes = [(tweets/total) * 100, (retweets/total) * 100, (replies/total) * 100]
+        # The slices will be ordered and plotted counter-clockwise.
+        percents = [(float(tweets)/float(total)*100.0), (float(retweets)/float(total)*100.0),(float(replies)/float(total)*100.0)]
 
-        fig1, ax1 = plt.subplots()
-        ax1.pie(sizes, labels=labels, autopct='%1.1f%%',shadow=True, startangle=90)
-        ax1.axis('equal')
+        labels = 'Tweets (' + str(percents[0]) + '%)', 'Retweets (' + str(percents[1]) + '%)', 'Replies (' + str(percents[2]) + '%)'
+        fracs = [tweets, retweets, replies]
+        colors = ['#ff4d4d', '#0FAC36', '#0F18AC'] # red, green, blue
+
+        patches, texts = plt.pie(fracs, colors=colors, shadow=True, startangle=90)
+        plt.legend(patches, labels, loc="best")
+        plt.axis('equal')
+
+        plt.tight_layout()
+        plt.title('Relative Frequencies of Different Activity Types')
+        plt.show()
+
+    def barChart(self, tweets, retweets, replies):
+        vals = [tweets, retweets, replies]
+        labels = ('Tweets', 'Retweets', 'Replies')
+        n_groups = len(vals)
+        bar_width = 1/1.5
+        pos = np.arange(len(labels))
+        
+        plt.bar(pos, vals, align='center', alpha=0.5)
+        plt.xticks(pos, labels)
+        plt.ylabel('Absolute Frequency')
+        plt.xlabel('Activity Type')
+        plt.title('Absolute Frequencies of Different Activity Types')
 
         plt.show()
+
+        # fig.set_xlabel('Activity')
+        # fig.set_ylabel('Frequency (absolute)')
+        # fig.set_title('Comparing absolute frequencies of activities')
+        # fig.set_xticks(n_groups + bar_width)
+        # fig.set_xticklabels(('Tweets', 'Retweets', 'Replies'))
+        # fig.legend()
+
+        # fig.tight_layout()
+        # plt.show()
 
     def tweetsTimeLine(self, data):
         groupbytime = data.groupby('time').count()
