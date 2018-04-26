@@ -52,7 +52,8 @@ class Plotter:
         # plt.show()
 
     def tweetsTimeLine(self, data):
-        groupbytime = data.groupby('time').count()
+        tweets = data[data['text'].str.startswith("RT") == False]
+        groupbytime = tweets.groupby('time').count()
         time = groupbytime.iloc[:, 0]
         count = 0
         num = [] #number of tweets
@@ -73,6 +74,30 @@ class Plotter:
         ax.set_ylabel('Number of Tweets')
         plt.show()
 
+    def retweetsTimeLine(self, data):
+        retweets = data[data['text'].str.startswith("RT") == True]
+        groupbytime = retweets.groupby('time').count()
+        time = groupbytime.iloc[:, 0]
+        count = 0
+        num = [] #number of tweets
+        xticks = []
+        for i, v in time.iteritems():
+            count += 1
+            num.append(v)
+            xticks.append(i)
+
+        y = num
+        fig, ax = plt.subplots()
+        ax.plot(y)
+        start, end = ax.get_xlim()
+        ax.xaxis.set_ticks(np.arange(start, end, 300))
+        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%0.1f'))
+        ax.set_xticklabels(xticks, rotation='vertical', fontsize=8)
+        ax.set_xlabel('Time and Date')
+        ax.set_ylabel('Number of Retweets')
+        plt.show()
+    
+        
     def hashTagesWordCloud(self, data):
         hashTags = data.loc[:, 'entities_str']
         words = []
