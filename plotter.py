@@ -137,3 +137,8 @@ class Plotter:
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
         plt.show()
+
+    def f(x):
+        return x
+    
+    

@@ -105,6 +105,3 @@ class CensusReader:
             returnString += str(m + 1) + ". " + str(sortPlat[m]) + "\n"
         return returnString
     
-    
-    
-    

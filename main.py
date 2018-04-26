@@ -1,5 +1,8 @@
 from parsing import *
 from plotter import *
+from __future__ import print_function
+from ipywidgets import interact, interactive, fixed, interact_manual
+import ipywidgets as widgets
 
 cr = CensusReader("data/CometLanding.csv")
 retweets = cr.retweetCount()
