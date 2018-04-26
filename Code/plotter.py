@@ -23,7 +23,7 @@ class Plotter:
         plt.axis('equal')
 
         plt.tight_layout()
-        plt.title('Relative Frequencies of Different Activity Types')
+        plt.title('Pie Chart Showing Frequencies of Different Activity Types')
         plt.show()
 
     def barChart(self, tweets, retweets, replies):
@@ -37,7 +37,7 @@ class Plotter:
         plt.xticks(pos, labels)
         plt.ylabel('Absolute Frequency')
         plt.xlabel('Activity Type')
-        plt.title('Absolute Frequencies of Different Activity Types')
+        plt.title('Bar Chart Showing Frequencies of Different Activity Types')
 
         plt.show()
 
