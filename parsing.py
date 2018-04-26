@@ -86,3 +86,25 @@ class CensusReader:
         for x in range(0,number):
             returnString += str(x + 1) + ". #" + sortedHTagsAndCounts[x][0] + " : " + str(sortedHTagsAndCounts[x][1]) + " tweets (of any type)\n"
         return returnString
+    
+    def appUsed(self):
+        apps = self.data['source'].str.extract("<.*>(.*)</a>", expand = False)
+        platforms = {}
+        for x in apps:
+            y = str(x)
+            if y in platforms:
+                platforms[y] += 1
+            else:
+                platforms[y] = 1
+        import operator
+        sortPlat= sorted(platforms.items(), key=operator.itemgetter(1), reverse=True)
+        
+        
+        returnString = "Top Platforms used \n"
+        for m in range(0,20):
+            returnString += str(m + 1) + ". " + str(sortPlat[m]) + "\n"
+        return returnString
+    
+    
+    
+    
