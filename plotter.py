@@ -96,7 +96,29 @@ class Plotter:
         ax.set_xlabel('Time and Date')
         ax.set_ylabel('Number of Retweets')
         plt.show()
-    
+        
+    def repliesTimeLine(self, data):
+        replies = data[data['in_reply_to_screen_name'].notnull() == True]
+        groupbytime = replies.groupby('time').count()
+        time = groupbytime.iloc[:, 0]
+        count = 0
+        num = [] #number of tweets
+        xticks = []
+        for i, v in time.iteritems():
+            count += 1
+            num.append(v)
+            xticks.append(i)
+
+        y = num
+        fig, ax = plt.subplots()
+        ax.plot(y)
+        start, end = ax.get_xlim()
+        ax.xaxis.set_ticks(np.arange(start, end, 300))
+        ax.xaxis.set_major_formatter(ticker.FormatStrFormatter('%0.1f'))
+        ax.set_xticklabels(xticks, rotation='vertical', fontsize=8)
+        ax.set_xlabel('Time and Date')
+        ax.set_ylabel('Number of Replies')
+        plt.show()
         
     def hashTagesWordCloud(self, data):
         hashTags = data.loc[:, 'entities_str']
