@@ -6,7 +6,7 @@ To use:
 
 2. Run "pip3 install ipywidgets --user" once (to install wordcloud package) in Terminal
 
-3. CD into Code directory in Python2
+3. cd into Code directory in Python2
 
 4. Run "python3 main.py" to generate data for Jupyter and make and show the wordcloud
 
