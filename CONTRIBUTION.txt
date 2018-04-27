@@ -1,0 +1,5 @@
+The file
+CONTRIBUTION.txt
+should be prepared individually by each member of the group.   It
+should contain your matriculation number and describe your own contributions to the project.
+The rest of the submission should be the same for everyone in the group.
