@@ -181,7 +181,7 @@ class Plotter:
         UG = G.to_undirected()
 
         width = 0.003
-        if (whatPlotting == "replies"): width = 0.4
+        if (whatPlotting == "replies"): width = 0.3
         if (whatPlotting == "mentions"): width = 0.07
 
         options = {
