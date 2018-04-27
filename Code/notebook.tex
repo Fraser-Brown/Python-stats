@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{Jupyter}
+    \title{CometLanding Hashtag Tweet Analysis}
     
     
     
@@ -280,10 +280,14 @@
     
 
     
+    Analysis of Tweets Containing the CometLanding Hashtag
+
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}1}]:} \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
 \end{Verbatim}
 
+
+    Preprocessing input CSV data
 
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}2}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
@@ -298,8 +302,67 @@ Refined data can be found in 'data/CometLanding\_refined.csv'.
 
     \end{Verbatim}
 
+    CensusReader class \textbf{init}() method
+
+The \textbf{init}() method in the CensusReader class calls read\_csv()
+from pandas on the file CometLanding.csv. This creates a DataFrame which
+is then parsed with validateFile(); invalid tweets are removed in this
+process.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}3}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+{\color{incolor}In [{\color{incolor}3}]:} \PY{k}{def} \PY{n+nf}{\PYZus{}\PYZus{}init\PYZus{}\PYZus{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{fileName}\PY{p}{)}\PY{p}{:}
+            \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{fileName} \PY{o}{=} \PY{n}{fileName}
+            \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{n}{fileName}\PY{p}{)}
+            
+            \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{valid}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{k+kc}{True}
+            \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{validateFile}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    validateFile() method
+
+The validateFile() method finds all duplicte entries in the DataFrame
+(by their string tweet ID). It then removes all the duplicate entries
+from the DataFrame, before printing the number of duplicate tweets
+(invalid rows) there were. Finally, it outputs the remaining (valid,
+non-duplicate) entries/tweets in the DataFrame to a new CSV file. It
+outputs it to the filename the data was read in from, with \_refined
+added before the .csv extension; the data is converted from a DataFrame
+into CSV format using the to\_csv() method.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{k}{def} \PY{n+nf}{validateFile}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+                \PY{c+c1}{\PYZsh{}check duplication}
+                \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{valid}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{valid}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{\PYZam{}} \PY{o}{\PYZti{}}\PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{o}{.}\PY{n}{duplicated}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{id\PYZus{}str}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{)}
+        
+                \PY{n}{invalidData} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{o}{.}\PY{n}{query}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{valid == False}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+                \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{o}{.}\PY{n}{query}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{valid == True}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        
+                \PY{c+c1}{\PYZsh{} Drops the \PYZsq{}valid\PYZsq{} column since it is no longer needed.}
+                \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{valid}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+        
+                \PY{n}{invalidRows} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{invalidData}\PY{p}{)}
+        
+                \PY{k}{if} \PY{p}{(}\PY{n}{invalidRows} \PY{o}{\PYZgt{}} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{:}
+                    \PY{k}{if} \PY{n}{invalidRows} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{:}
+                        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{File contains 1 invalid row!}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+                    \PY{k}{else}\PY{p}{:}
+                        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{File contains }\PY{l+s+s2}{\PYZdq{}}\PY{o}{+}\PY{n+nb}{str}\PY{p}{(}\PY{n}{invalidRows}\PY{p}{)}\PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ invalid rows!}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        
+                    \PY{c+c1}{\PYZsh{}make a new file}
+                    \PY{k}{if} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{fileName}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{4}\PY{p}{:}\PY{p}{]} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}
+                        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Refining the data given and storing it a new file...}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+                        \PY{n}{newFileName} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{fileName}\PY{p}{[}\PY{p}{:}\PY{o}{\PYZhy{}}\PY{l+m+mi}{4}\PY{p}{]} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}
+                        \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{o}{.}\PY{n}{to\PYZus{}csv}\PY{p}{(}\PY{n}{newFileName}\PY{p}{)}
+                        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Refined data can be found in }\PY{l+s+se}{\PYZbs{}\PYZsq{}}\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n}{newFileName} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+se}{\PYZbs{}\PYZsq{}}\PY{l+s+s2}{.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\end{Verbatim}
+
+
+    Counting the numbers of tweets, replies, retweets, and users, and
+calculating average user activity.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
         
         \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
         \PY{n}{retweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{retweetCount}\PY{p}{(}\PY{p}{)}
@@ -333,207 +396,624 @@ The average number of retweets by a user in the dataset was 1.1953697800446286.
 
     \end{Verbatim}
 
+    retweetCount() method
+
+The retweetCount() method first finds if the tweet text for each item in
+the DataFrame from the CSV data starts with "RT", indicating it is a
+retweet. Each result is added to a new list of Boolean values; the sum()
+method is then used to count the number of True values in the list (i.e.
+retweets). The value of the sum function is then returned.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}4}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        
-        \PY{n}{retweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{retweetCount}\PY{p}{(}\PY{p}{)}
-        \PY{n}{replies} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{replyCount}\PY{p}{(}\PY{p}{)}
-        \PY{n}{tweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{tweetCount}\PY{p}{(}\PY{p}{)}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{pieChart}\PY{p}{(}\PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}6}]:} \PY{k}{def} \PY{n+nf}{retweetCount}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+            \PY{k}{return} \PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{)}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    replyCount() method
+
+The replyCount() method first finds if the 'in\_reply\_to\_screen\_name'
+field for each item in the DataFrame from the CSV isn't empty,
+indicating it is a reply. Each result is added to a new list of Boolean
+values; the sum() method is then used to count the number of True values
+in the list (i.e. replies). The value of the sum function is then
+returned.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}7}]:} \PY{k}{def} \PY{n+nf}{replyCount}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+            \PY{k}{return} \PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{)}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    tweetCount() method
+
+The tweetCount() method first finds the number of unique tweets. It does
+this by taking all parsable entries in the DataFrame (from which
+duplicates have already been dropped). It then finds the length of the
+resulting DataFrame (of all unique tweets), representing the total
+number of tweets of any kind. To then find the number of tweets that are
+not replies or retweets, we then subtract the result of the replyCount()
+and retweetCount() methods from the number of unique tweets found.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{k}{def} \PY{n+nf}{tweetCount}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+            \PY{k}{return} \PY{n+nb}{len}\PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{entities\PYZus{}str}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{replyCount}\PY{p}{(}\PY{p}{)} \PY{o}{\PYZhy{}} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{retweetCount}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    userCount() method
+
+The userCount() method first finds entries in the DataFrane who have
+unique posting users (i.e. removing all but one tweet posted by each
+user with one or more tweet in the dataset) It does this with the pandas
+drop\_duplicates() method. The length of the resulting DataFrame is then
+returned, representing the number of unique uesers who posted tweets in
+the dataset.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}9}]:} \PY{k}{def} \PY{n+nf}{userCount}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+            \PY{k}{return} \PY{n+nb}{len}\PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{o}{.}\PY{n}{drop\PYZus{}duplicates}\PY{p}{(}\PY{n}{subset}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{from\PYZus{}user\PYZus{}id\PYZus{}str}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    Pie chart showing composition of activity by type
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}10}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         
+         \PY{n}{retweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{retweetCount}\PY{p}{(}\PY{p}{)}
+         \PY{n}{replies} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{replyCount}\PY{p}{(}\PY{p}{)}
+         \PY{n}{tweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{tweetCount}\PY{p}{(}\PY{p}{)}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{pieChart}\PY{p}{(}\PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_3_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_19_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
+    pieChart() method
+
+The pieChart() method begins by adding the numbers of tweets, retweets,
+and replies in the DataFrame. It then finds the percentage proportion of
+all activity for each activity type (tweets, retweets, and replies).It
+then creates lists of labels for the legend, the "slice" sizes, and
+colours of the pie chart. These and other arguments are then passed to
+plt.pie() and other plt() methods to generate and then display the pie
+chart (plt represents matplotlib.pyplot).
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}5}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        
-        \PY{n}{retweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{retweetCount}\PY{p}{(}\PY{p}{)}
-        \PY{n}{replies} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{replyCount}\PY{p}{(}\PY{p}{)}
-        \PY{n}{tweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{tweetCount}\PY{p}{(}\PY{p}{)}
-        
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{barChart}\PY{p}{(}\PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}11}]:} \PY{k}{def} \PY{n+nf}{pieChart}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{)}\PY{p}{:}
+             \PY{n}{total} \PY{o}{=} \PY{n}{tweets} \PY{o}{+} \PY{n}{retweets} \PY{o}{+} \PY{n}{replies}
+             \PY{c+c1}{\PYZsh{} The slices will be ordered and plotted counter\PYZhy{}clockwise.}
+             \PY{n}{percents} \PY{o}{=} \PY{p}{[}\PY{p}{(}\PY{n+nb}{float}\PY{p}{(}\PY{n}{tweets}\PY{p}{)}\PY{o}{/}\PY{n+nb}{float}\PY{p}{(}\PY{n}{total}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100.0}\PY{p}{)}\PY{p}{,} \PY{p}{(}\PY{n+nb}{float}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}\PY{o}{/}\PY{n+nb}{float}\PY{p}{(}\PY{n}{total}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100.0}\PY{p}{)}\PY{p}{,}\PY{p}{(}\PY{n+nb}{float}\PY{p}{(}\PY{n}{replies}\PY{p}{)}\PY{o}{/}\PY{n+nb}{float}\PY{p}{(}\PY{n}{total}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100.0}\PY{p}{)}\PY{p}{]}
+         
+             \PY{n}{labels} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Tweets (}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{percents}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Retweets (}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{percents}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Replies (}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{percents}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}}
+             \PY{n}{fracs} \PY{o}{=} \PY{p}{[}\PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{]}
+             \PY{n}{colors} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsh{}ff4d4d}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsh{}0FAC36}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsh{}0F18AC}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} red, green, blue}
+         
+             \PY{n}{patches}\PY{p}{,} \PY{n}{texts} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{pie}\PY{p}{(}\PY{n}{fracs}\PY{p}{,} \PY{n}{colors}\PY{o}{=}\PY{n}{colors}\PY{p}{,} \PY{n}{shadow}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{startangle}\PY{o}{=}\PY{l+m+mi}{90}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{n}{patches}\PY{p}{,} \PY{n}{labels}\PY{p}{,} \PY{n}{loc}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{best}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{equal}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         
+             \PY{n}{plt}\PY{o}{.}\PY{n}{tight\PYZus{}layout}\PY{p}{(}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Pie Chart Showing Frequencies of Different Activity Types}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    Bar chart showing composition of activity by type
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}12}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         
+         \PY{n}{retweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{retweetCount}\PY{p}{(}\PY{p}{)}
+         \PY{n}{replies} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{replyCount}\PY{p}{(}\PY{p}{)}
+         \PY{n}{tweets} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{tweetCount}\PY{p}{(}\PY{p}{)}
+         
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{barChart}\PY{p}{(}\PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_4_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_23_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
+    The barChart() method
+
+The barChart() method is very similar to the pieChart() method, using
+the numbers of tweets, retweets, and replies in the DataFrame. Again,
+values to be used as parameters for the bar chart are generated from the
+fequency of each activity type; these are used with their Names, as well
+as axis labels and a title to generate the bar chart, again with plt as
+matplotlib.pyplot.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}6}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n+nb}{print}\PY{p}{(}\PY{n}{cr}\PY{o}{.}\PY{n}{mostPopHashtags}\PY{p}{(}\PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}13}]:} \PY{k}{def} \PY{n+nf}{barChart}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{)}\PY{p}{:}
+             \PY{n}{vals} \PY{o}{=} \PY{p}{[}\PY{n}{tweets}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{]}
+             \PY{n}{labels} \PY{o}{=} \PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Tweets}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Retweets}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Replies}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{n\PYZus{}groups} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{vals}\PY{p}{)}
+             \PY{n}{bar\PYZus{}width} \PY{o}{=} \PY{l+m+mi}{1}\PY{o}{/}\PY{l+m+mf}{1.5}
+             \PY{n}{pos} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{labels}\PY{p}{)}\PY{p}{)}
+             
+             \PY{n}{plt}\PY{o}{.}\PY{n}{bar}\PY{p}{(}\PY{n}{pos}\PY{p}{,} \PY{n}{vals}\PY{p}{,} \PY{n}{align}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{center}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.5}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{n}{pos}\PY{p}{,} \PY{n}{labels}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Absolute Frequency}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Activity Type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bar Chart Showing Frequencies of Different Activity Types}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             
+             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    Finding the 10 most common hashtags used
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}14}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{n}{cr}\PY{o}{.}\PY{n}{mostPopHashtags}\PY{p}{(}\PY{l+m+mi}{10}\PY{p}{,} \PY{k+kc}{False}\PY{p}{)}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{n}{cr}\PY{o}{.}\PY{n}{mostPopHashtags}\PY{p}{(}\PY{l+m+mi}{10}\PY{p}{,} \PY{k+kc}{True}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-1. \#CometLanding : 62752 tweets (of any type)
-2. \#cometlanding : 13211 tweets (of any type)
-3. \#67P : 7922 tweets (of any type)
-4. \#Rosetta : 5912 tweets (of any type)
-5. \#Philae : 3097 tweets (of any type)
-6. \#Cometlanding : 1036 tweets (of any type)
-7. \#WishKoSaPasko : 988 tweets (of any type)
-8. \#HappyBirthdaySandaraPark : 965 tweets (of any type)
-9. \#rosetta : 702 tweets (of any type)
-10. \#esa : 680 tweets (of any type)
+1. \#CometLanding : 62752 tweets
+2. \#cometlanding : 13211 tweets
+3. \#67P : 7922 tweets
+4. \#Rosetta : 5912 tweets
+5. \#Philae : 3097 tweets
+6. \#Cometlanding : 1036 tweets
+7. \#WishKoSaPasko : 988 tweets
+8. \#HappyBirthdaySandaraPark : 965 tweets
+9. \#rosetta : 702 tweets
+10. \#esa : 680 tweets
+
+
+
+
+1. \#67P : 7922 tweets
+2. \#Rosetta : 5912 tweets
+3. \#Philae : 3097 tweets
+4. \#WishKoSaPasko : 988 tweets
+5. \#HappyBirthdaySandaraPark : 965 tweets
+6. \#rosetta : 702 tweets
+7. \#esa : 680 tweets
+8. \#SEP : 623 tweets
+9. \#philae : 600 tweets
+10. \#PoseToiPhilae : 569 tweets
 
 
     \end{Verbatim}
 
+    The mostPopHashtags() method
+
+The mostPopHashtags() method begins by getting sorted list of hashtags
+and their numbers of occurances from the getHTagsAndCounts() method. The
+method then checks if the user wants to exclude variants of the
+\#CometLanding hashtag from the results; if so, the method will iterate
+over the items in the list up to the number to be printed, removing any
+matches to the \#CometLanding hashtag and then moving back. The method
+then iterates over the resultant list of hashtags up to the nth largest
+to be printed, printing each hashtag and the number of tweets in the
+DataFrame it appears in.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}7}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{import} \PY{n+nn}{json}
-        \PY{k+kn}{from} \PY{n+nn}{wordcloud} \PY{k}{import} \PY{n}{WordCloud}
-        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
-        
-        \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
-        \PY{n}{hashTags} \PY{o}{=} \PY{n}{data}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{entities\PYZus{}str}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
-        \PY{n}{words} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-        \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{v} \PY{o+ow}{in} \PY{n}{hashTags}\PY{o}{.}\PY{n}{iteritems}\PY{p}{(}\PY{p}{)}\PY{p}{:}
-            \PY{k}{try}\PY{p}{:}
-                \PY{n}{j} \PY{o}{=} \PY{n}{json}\PY{o}{.}\PY{n}{loads}\PY{p}{(}\PY{n}{v}\PY{p}{)}
-                \PY{k}{for} \PY{n}{tag} \PY{o+ow}{in} \PY{n}{j}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hashtags}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{:}
-                    \PY{k}{if} \PY{n}{tag}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{!=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{CometLanding}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}
-                        \PY{n}{words}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{tag}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
-            \PY{k}{except} \PY{n+ne}{TypeError}\PY{p}{:}
-                \PY{k}{pass}
-        
-        \PY{n}{wordcloud} \PY{o}{=} \PY{n}{WordCloud}\PY{p}{(}\PY{n}{width}\PY{o}{=}\PY{l+m+mi}{1000}\PY{p}{,} \PY{n}{height}\PY{o}{=}\PY{l+m+mi}{500}\PY{p}{)}\PY{o}{.}\PY{n}{generate}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ }\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{words}\PY{p}{)}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{wordcloud}\PY{p}{,} \PY{n}{interpolation}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{bilinear}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{off}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}15}]:} \PY{k}{def} \PY{n+nf}{mostPopHashtags}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{number}\PY{p}{,} \PY{n}{excludeCometLanding}\PY{p}{)}\PY{p}{:}
+             \PY{n}{sortedHTagsAndCounts} \PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getHTagsAndCounts}\PY{p}{(}\PY{p}{)}\PY{p}{,} \PY{n}{key} \PY{o}{=} \PY{n}{itemgetter}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{,} \PY{n}{reverse}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+             \PY{n}{returnString} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}
+             
+             \PY{k}{if} \PY{n}{excludeCometLanding}\PY{p}{:}
+                 \PY{n+nb}{max} \PY{o}{=} \PY{n}{number} \PY{o}{\PYZhy{}} \PY{l+m+mi}{1}
+                 \PY{n}{x} \PY{o}{=} \PY{l+m+mi}{0}
+                 \PY{k}{while} \PY{n}{x} \PY{o}{\PYZlt{}} \PY{n+nb}{max}\PY{p}{:}
+                     \PY{k}{if} \PY{n}{sortedHTagsAndCounts}\PY{p}{[}\PY{n}{x}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{lower}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{cometlanding}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}
+                         \PY{k}{del} \PY{n}{sortedHTagsAndCounts}\PY{p}{[}\PY{n}{x}\PY{p}{]}
+                     \PY{k}{else}\PY{p}{:} \PY{n}{x} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+             
+             \PY{k}{for} \PY{n}{x} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{n}{number}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{returnString} \PY{o}{+}\PY{o}{=} \PY{n+nb}{str}\PY{p}{(}\PY{n}{x} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{. \PYZsh{}}\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n}{sortedHTagsAndCounts}\PY{p}{[}\PY{n}{x}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ : }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{sortedHTagsAndCounts}\PY{p}{[}\PY{n}{x}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ tweets}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}
+             
+             \PY{k}{return} \PY{n}{returnString}
+\end{Verbatim}
+
+
+    The getHTagsAndCounts() method
+
+The getHTagsAndCounts() method begins by getting a list of every
+hashtag; each is present in the list the number of times it is tweeted
+as hashtags are extracted from tweets and added to the list for each
+tweet. This is done in the getHashTags() method. This list is then
+sorted, before a list without duplicates is found using the
+removeDuplicates() method. This new list without duplicates is then
+iterated over; each hashtag in it, and the number of times it is present
+in the original list of hashtags (found using a Counter) is added in a
+new array item in a new 2D array, hTagsAndCounts, containing each
+hashtag, and the number of times it is present in a tweet in the
+DataFrame. This new 2D array is then returned.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}16}]:} \PY{k}{def} \PY{n+nf}{getHTagsAndCounts}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+             \PY{n}{hashtags} \PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{getHashTags}\PY{p}{(}\PY{p}{)}\PY{p}{,} \PY{n}{reverse}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+             \PY{n}{hashtagsNoDuplicates} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{removeDuplicates}\PY{p}{(}\PY{n}{hashtags}\PY{p}{)}
+             \PY{n}{hTagsAndCounts} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{n}{counter} \PY{o}{=} \PY{n}{Counter}\PY{p}{(}\PY{n}{hashtags}\PY{p}{)}
+             \PY{k}{for} \PY{n}{ht} \PY{o+ow}{in} \PY{n}{hashtagsNoDuplicates}\PY{p}{:}
+                 \PY{n}{count} \PY{o}{=} \PY{n}{counter}\PY{p}{[}\PY{n}{ht}\PY{p}{]} \PY{c+c1}{\PYZsh{} hashtags.count(ht)}
+                 \PY{n}{hTagsAndCounts}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{[}\PY{n}{ht}\PY{p}{,} \PY{n}{count}\PY{p}{]}\PY{p}{)}
+             \PY{k}{return} \PY{n}{hTagsAndCounts}
+\end{Verbatim}
+
+
+    The getHashTags() method
+
+The getHashTags() method generates a list of each hashtag each time it
+is in a tweet in the DataFrame. It begins by removing all fields but
+'entities\_str' for each entry in the DataFrame using the loc pandas
+function. It then generates a JSON object from the 'entities\_str' field
+for each entry in the DataFrame using json.load(). The JSON array of
+hashtags are then extracted from this, and iterated over; each hashtag
+in the JSON hashtag list in the JSON entities object for each entry
+(tweet) is also then iterated over. The text of each hashtag is then
+appended to the list of hashtags being build. When all iteration
+terminates, the resultant list of hashtags is returned.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}17}]:} \PY{k}{def} \PY{n+nf}{getHashTags}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+             \PY{c+c1}{\PYZsh{}     hashtags = self.data.groupby(\PYZsq{}entities\PYZus{}str\PYZsq{}).count().sort\PYZus{}values(by=[\PYZsq{}id\PYZus{}str\PYZsq{}], ascending=False).head(number)}
+             \PY{n}{data} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}
+             \PY{n}{hashtags} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{n}{jsonItems} \PY{o}{=} \PY{n}{data}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{entities\PYZus{}str}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} lst of JSON hashtag items}
+             \PY{c+c1}{\PYZsh{} each JSON hashtag item has syntax: \PYZob{}\PYZdq{}\PYZdq{}hashtags\PYZdq{}\PYZdq{}:[\PYZob{}\PYZdq{}\PYZdq{}text\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}67P\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}indices\PYZdq{}\PYZdq{}:[58,62]\PYZcb{},\PYZob{}\PYZdq{}\PYZdq{}text\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}CometWatch\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}indices\PYZdq{}\PYZdq{}:[127,138]\PYZcb{},\PYZob{}\PYZdq{}\PYZdq{}text\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}CometLanding\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}indices\PYZdq{}\PYZdq{}:[139,140]\PYZcb{}],\PYZdq{}\PYZdq{}symbols\PYZdq{}\PYZdq{}:[],\PYZdq{}\PYZdq{}user\PYZus{}mentions\PYZdq{}\PYZdq{}:[\PYZob{}\PYZdq{}\PYZdq{}screen\PYZus{}name\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}ESA\PYZus{}Rosetta\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}name\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}ESA Rosetta Mission\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}id\PYZdq{}\PYZdq{}:253536357,\PYZdq{}\PYZdq{}id\PYZus{}str\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}253536357\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}indices\PYZdq{}\PYZdq{}:[3,15]\PYZcb{}],\PYZdq{}\PYZdq{}urls\PYZdq{}\PYZdq{}:[\PYZob{}\PYZdq{}\PYZdq{}url\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}http://t.co/Z2A14Jorv6\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}expanded\PYZus{}url\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}http://youtu.be/4a3eY5siRRk\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}display\PYZus{}url\PYZdq{}\PYZdq{}:\PYZdq{}\PYZdq{}youtu.be/4a3eY5siRRk\PYZdq{}\PYZdq{},\PYZdq{}\PYZdq{}indices\PYZdq{}\PYZdq{}:[104,126]\PYZcb{}]\PYZcb{}\PYZdq{}.}
+             \PY{k}{for} \PY{n}{JSONString} \PY{o+ow}{in} \PY{n}{jsonItems}\PY{p}{:}
+                 \PY{k}{if} \PY{o+ow}{not} \PY{n+nb}{type}\PY{p}{(}\PY{n}{JSONString}\PY{p}{)} \PY{o+ow}{is} \PY{n+nb}{str}\PY{p}{:} \PY{k}{continue}
+                 \PY{n}{parsedJSON} \PY{o}{=} \PY{n}{json}\PY{o}{.}\PY{n}{loads}\PY{p}{(}\PY{n}{JSONString}\PY{p}{)}
+                 \PY{n}{JSONHashTagsElement} \PY{o}{=} \PY{n}{parsedJSON}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hashtags}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+                 \PY{k}{for} \PY{n}{JSONHashTag} \PY{o+ow}{in} \PY{n}{JSONHashTagsElement}\PY{p}{:}
+                     \PY{n}{hashtags}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{JSONHashTag}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+             \PY{k}{return} \PY{n}{hashtags}
+\end{Verbatim}
+
+
+    The removeDuplicates() method
+
+Copied from https://www.peterbe.com/plog/uniqifiers-benchmark. This
+method adds all the items in the list seq to a dictionary as keys; if an
+identical item is added it will override the previous entry for the
+identical key, thus eliminating duplicates. The keyset from the
+dictionary, copied from the seq list, is then returned.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}18}]:} \PY{k}{def} \PY{n+nf}{removeDuplicates}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{seq}\PY{p}{)}\PY{p}{:}
+             \PY{c+c1}{\PYZsh{} Not order preserving}
+             \PY{n}{keys} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+             \PY{k}{for} \PY{n}{e} \PY{o+ow}{in} \PY{n}{seq}\PY{p}{:}
+                 \PY{n}{keys}\PY{p}{[}\PY{n}{e}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+             \PY{k}{return} \PY{n}{keys}\PY{o}{.}\PY{n}{keys}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    Hashtag wordcloud
+
+    Hashtag wordcloud
+
+The wordcloud code first filters all but the JSON entities field from
+each entry in the DataSet. Each entities field (for each entry) is then
+iterated over, and is parsed into a JSON object. Each hashtag in the
+hashtags object in the entites JSON object is then iterated over. If the
+text (field) of the hashtag is not "CometLanding" in some form, it is
+added to the list of hashtags being built. The WordCloud function from
+the wordcloud library is then used to build up a wordcloud image, and
+plt (as matplotlib.pyplot) is then used to display the wordcloud.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}19}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{import} \PY{n+nn}{json}
+         \PY{k+kn}{from} \PY{n+nn}{wordcloud} \PY{k}{import} \PY{n}{WordCloud}
+         \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+         
+         \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
+         \PY{n}{hashTags} \PY{o}{=} \PY{n}{data}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{entities\PYZus{}str}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+         \PY{n}{words} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+         \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{v} \PY{o+ow}{in} \PY{n}{hashTags}\PY{o}{.}\PY{n}{iteritems}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+             \PY{k}{try}\PY{p}{:}
+                 \PY{n}{j} \PY{o}{=} \PY{n}{json}\PY{o}{.}\PY{n}{loads}\PY{p}{(}\PY{n}{v}\PY{p}{)}
+                 \PY{k}{for} \PY{n}{tag} \PY{o+ow}{in} \PY{n}{j}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{hashtags}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{:}
+                     \PY{k}{if} \PY{n}{tag}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{lower}\PY{p}{(}\PY{p}{)} \PY{o}{!=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{cometlanding}\PY{l+s+s2}{\PYZdq{}}\PY{p}{:}
+                         \PY{n}{words}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{tag}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+             \PY{k}{except} \PY{n+ne}{TypeError}\PY{p}{:}
+                 \PY{k}{pass}
+         
+         \PY{n}{wordcloud} \PY{o}{=} \PY{n}{WordCloud}\PY{p}{(}\PY{n}{width}\PY{o}{=}\PY{l+m+mi}{1000}\PY{p}{,} \PY{n}{height}\PY{o}{=}\PY{l+m+mi}{500}\PY{p}{)}\PY{o}{.}\PY{n}{generate}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ }\PY{l+s+s2}{\PYZdq{}}\PY{o}{.}\PY{n}{join}\PY{p}{(}\PY{n}{words}\PY{p}{)}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{imshow}\PY{p}{(}\PY{n}{wordcloud}\PY{p}{,} \PY{n}{interpolation}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{bilinear}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{off}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_6_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_38_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
+    Most common platforms
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}8}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n+nb}{print} \PY{p}{(}\PY{n}{cr}\PY{o}{.}\PY{n}{appUsed}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}20}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print} \PY{p}{(}\PY{n}{cr}\PY{o}{.}\PY{n}{appUsed}\PY{p}{(}\PY{p}{)}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
 Top Platforms used 
-1. ('Twitter Web Client', 27925)
-2. ('Twitter for iPhone', 13743)
-3. ('Twitter for Android', 12770)
-4. ('TweetDeck', 4075)
-5. ('Twitter for iPad', 3282)
-6. ('dlvr.it', 1671)
-7. ('Twitter for Websites', 1462)
-8. ('Tweetbot for iÎŸS', 1055)
-9. ('Twitter for Windows Phone', 932)
-10. ('Tweet Old Post', 925)
-11. ('Twitter for Mac', 915)
-12. ('Twitter for Android Tablets', 897)
-13. ('Hootsuite', 796)
-14. ('TweetCaster for Android', 477)
-15. ('Ø§Ø´ØªØ±Ø±ÙƒÙ€Ù€Ù€ Ø§Ù„Ø¢Ù†', 356)
-16. ('Twitter for BlackBerryÂ®', 345)
-17. ('Mobile Web (M5)', 315)
-18. ('IFTTT', 303)
-19. ('Twitter for BlackBerry', 291)
-20. ('Tweetbot for Mac', 289)
+1. 'Twitter Web Client', 27925
+2. 'Twitter for iPhone', 13743
+3. 'Twitter for Android', 12770
+4. 'TweetDeck', 4075
+5. 'Twitter for iPad', 3282
+6. 'dlvr.it', 1671
+7. 'Twitter for Websites', 1462
+8. 'Tweetbot for iÎŸS', 1055
+9. 'Twitter for Windows Phone', 932
+10. 'Tweet Old Post', 925
+11. 'Twitter for Mac', 915
+12. 'Twitter for Android Tablets', 897
+13. 'Hootsuite', 796
+14. 'TweetCaster for Android', 477
+15. 'Ø§Ø´ØªØ±Ø±ÙƒÙ€Ù€Ù€ Ø§Ù„Ø¢Ù†', 356
+16. 'Twitter for BlackBerryÂ®', 345
+17. 'Mobile Web M5', 315
+18. 'IFTTT', 303
+19. 'Twitter for BlackBerry', 291
+20. 'Tweetbot for Mac', 289
 
 
     \end{Verbatim}
 
+    appUsed() method
+
+The appUsed() method first filters the DataFrame, keeping only the
+source field in each entry. Each source field (in each entry), is added
+to a dictionary; if it is a new key it sets the number of occurances
+(value) as 1, otherwise increasing the value by 1. The resultant
+dictionary is then sorted by largest to smallest keys (number of
+occurances). A for loop then iterates over each key-value pair in the
+dictionary, generating a human-readable string representing the contents
+of the dictionary, which is then returned and then printed.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}9}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{data} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{data}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{tweetsTimeLine}\PY{p}{(}\PY{n}{data}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsTimeLine}\PY{p}{(}\PY{n}{data}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesTimeLine}\PY{p}{(}\PY{n}{data}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}21}]:} \PY{k}{def} \PY{n+nf}{appUsed}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{)}\PY{p}{:}
+             \PY{n}{apps} \PY{o}{=} \PY{n+nb+bp}{self}\PY{o}{.}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{source}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{extract}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZlt{}.*\PYZgt{}(.*)\PYZlt{}/a\PYZgt{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{expand} \PY{o}{=} \PY{k+kc}{False}\PY{p}{)}
+             \PY{n}{platforms} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+             \PY{k}{for} \PY{n}{x} \PY{o+ow}{in} \PY{n}{apps}\PY{p}{:}
+                 \PY{n}{y} \PY{o}{=} \PY{n+nb}{str}\PY{p}{(}\PY{n}{x}\PY{p}{)}
+                 \PY{k}{if} \PY{n}{y} \PY{o+ow}{in} \PY{n}{platforms}\PY{p}{:}
+                     \PY{n}{platforms}\PY{p}{[}\PY{n}{y}\PY{p}{]} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                 \PY{k}{else}\PY{p}{:}
+                     \PY{n}{platforms}\PY{p}{[}\PY{n}{y}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{1}
+             \PY{k+kn}{import} \PY{n+nn}{operator}
+             \PY{n}{sortPlat}\PY{o}{=} \PY{n+nb}{sorted}\PY{p}{(}\PY{n}{platforms}\PY{o}{.}\PY{n}{items}\PY{p}{(}\PY{p}{)}\PY{p}{,} \PY{n}{key}\PY{o}{=}\PY{n}{operator}\PY{o}{.}\PY{n}{itemgetter}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{,} \PY{n}{reverse}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+             
+             \PY{n}{returnString} \PY{o}{=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Top Platforms used }\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}
+             \PY{k}{for} \PY{n}{m} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{20}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{returnString} \PY{o}{+}\PY{o}{=} \PY{p}{(}\PY{n+nb}{str}\PY{p}{(}\PY{n}{m} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{. }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{sortPlat}\PY{p}{[}\PY{n}{m}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{(}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{)}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+             \PY{k}{return} \PY{n}{returnString}
+\end{Verbatim}
+
+
+    Tweet Activity Timelines
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}22}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{cr} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{data} \PY{o}{=} \PY{n}{cr}\PY{o}{.}\PY{n}{data}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{tweetsTimeLine}\PY{p}{(}\PY{n}{data}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsTimeLine}\PY{p}{(}\PY{n}{data}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesTimeLine}\PY{p}{(}\PY{n}{data}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_8_0.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_44_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_8_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_44_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_8_2.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_44_2.png}
     \end{center}
     { \hspace*{\fill} \\}
     
+    tweetsTimeLine() method
+
+The tweetsTimeLine() method begins by filtering out any retweets,
+finding only valid tweets. It then groups each entry in the DataFrame of
+valid tweets by the time field, using the pandas groupby() method. Each
+tweet time is then iterated over, and the number of tweets at each time
+is found, and stored in a separate list, num. These lists are
+preprocessed and then passed into methods imported from
+matplotlib.pyplot (as plt) to draw the timeline before it is displayed.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Analysing user interactions.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        
-        \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
-        
-        \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
-        \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{replies}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ replies prior to processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ retweets prior to processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ mentions containing mentions prior to processing.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        
-        \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
-        \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
-        \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
-        
-        \PY{n}{interactions} \PY{o}{=} \PY{n}{formattedReplies} \PY{o}{+} \PY{n}{formattedRetweets} \PY{o}{+} \PY{n}{formattedMentions}
-        
-        \PY{n}{retweets} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedRetweets}\PY{p}{)}
-        \PY{n}{replies} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{)}
-        \PY{n}{mentions} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedMentions}\PY{p}{)}
-        
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{replies}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ replies after processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{retweets}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ retweets after processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{mentions}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ mentions after processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Note: a tweet containing \PYZgt{}0 mentions can contain \PYZgt{}1 mention.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        
-        \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{interactions}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ interactions in total after processing.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}23}]:} \PY{k}{def} \PY{n+nf}{tweetsTimeLine}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{data}\PY{p}{)}\PY{p}{:}
+             \PY{n}{tweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+             \PY{n}{groupbytime} \PY{o}{=} \PY{n}{tweets}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{count}\PY{p}{(}\PY{p}{)}
+             \PY{n}{time} \PY{o}{=} \PY{n}{groupbytime}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}
+             \PY{n}{count} \PY{o}{=} \PY{l+m+mi}{0}
+             \PY{n}{num} \PY{o}{=} \PY{p}{[}\PY{p}{]} \PY{c+c1}{\PYZsh{}number of tweets}
+             \PY{n}{xticks} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{v} \PY{o+ow}{in} \PY{n}{time}\PY{o}{.}\PY{n}{iteritems}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{count} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                 \PY{n}{num}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{v}\PY{p}{)}
+                 \PY{n}{xticks}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{i}\PY{p}{)}
+             
+             \PY{n}{y} \PY{o}{=} \PY{n}{num}
+             \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{y}\PY{p}{)}
+             \PY{n}{start}\PY{p}{,} \PY{n}{end} \PY{o}{=} \PY{n}{ax}\PY{o}{.}\PY{n}{get\PYZus{}xlim}\PY{p}{(}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{xaxis}\PY{o}{.}\PY{n}{set\PYZus{}ticks}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{n}{start}\PY{p}{,} \PY{n}{end}\PY{p}{,} \PY{l+m+mi}{300}\PY{p}{)}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{xaxis}\PY{o}{.}\PY{n}{set\PYZus{}major\PYZus{}formatter}\PY{p}{(}\PY{n}{ticker}\PY{o}{.}\PY{n}{FormatStrFormatter}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{\PYZpc{}0.1f}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xticklabels}\PY{p}{(}\PY{n}{xticks}\PY{p}{,} \PY{n}{rotation}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{vertical}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{8}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time and Date}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Number of Tweets}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    retweetsTimeLine() method
+
+The retweetsTimeLine method is largely identical to tweetsTimeLine().
+The differences between the two are axes' labels, and that the tweets
+used in this case are filtered to be retweets. This is done by ensuring
+the text field of each entry in the DataFrame (representing the tweet
+text) starts with "RT".
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}24}]:} \PY{k}{def} \PY{n+nf}{retweetsTimeLine}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{data}\PY{p}{)}\PY{p}{:}
+             \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+             \PY{n}{groupbytime} \PY{o}{=} \PY{n}{retweets}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{count}\PY{p}{(}\PY{p}{)}
+             \PY{n}{time} \PY{o}{=} \PY{n}{groupbytime}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}
+             \PY{n}{count} \PY{o}{=} \PY{l+m+mi}{0}
+             \PY{n}{num} \PY{o}{=} \PY{p}{[}\PY{p}{]} \PY{c+c1}{\PYZsh{}number of tweets}
+             \PY{n}{xticks} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{v} \PY{o+ow}{in} \PY{n}{time}\PY{o}{.}\PY{n}{iteritems}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{count} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                 \PY{n}{num}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{v}\PY{p}{)}
+                 \PY{n}{xticks}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{i}\PY{p}{)}
+             
+             \PY{n}{y} \PY{o}{=} \PY{n}{num}
+             \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{y}\PY{p}{)}
+             \PY{n}{start}\PY{p}{,} \PY{n}{end} \PY{o}{=} \PY{n}{ax}\PY{o}{.}\PY{n}{get\PYZus{}xlim}\PY{p}{(}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{xaxis}\PY{o}{.}\PY{n}{set\PYZus{}ticks}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{n}{start}\PY{p}{,} \PY{n}{end}\PY{p}{,} \PY{l+m+mi}{300}\PY{p}{)}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{xaxis}\PY{o}{.}\PY{n}{set\PYZus{}major\PYZus{}formatter}\PY{p}{(}\PY{n}{ticker}\PY{o}{.}\PY{n}{FormatStrFormatter}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{\PYZpc{}0.1f}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xticklabels}\PY{p}{(}\PY{n}{xticks}\PY{p}{,} \PY{n}{rotation}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{vertical}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{8}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time and Date}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Number of Retweets}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    repliesTimeLine() method
+
+The repliesTimeLine method is also largely identical to
+tweetsTimeLine(). The differences between the two are axes' labels, and
+that the tweets used in this case are filtered to be replies. This is
+done by ensuring the text 'in\_reply\_to\_screen\_name' of each entry in
+the DataFrame is not null (i.e. there is someone the tweet is replying
+to).
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}25}]:} \PY{k}{def} \PY{n+nf}{repliesTimeLine}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{data}\PY{p}{)}\PY{p}{:}
+             \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+             \PY{n}{groupbytime} \PY{o}{=} \PY{n}{replies}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{count}\PY{p}{(}\PY{p}{)}
+             \PY{n}{time} \PY{o}{=} \PY{n}{groupbytime}\PY{o}{.}\PY{n}{iloc}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}
+             \PY{n}{count} \PY{o}{=} \PY{l+m+mi}{0}
+             \PY{n}{num} \PY{o}{=} \PY{p}{[}\PY{p}{]} \PY{c+c1}{\PYZsh{}number of tweets}
+             \PY{n}{xticks} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{v} \PY{o+ow}{in} \PY{n}{time}\PY{o}{.}\PY{n}{iteritems}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{count} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
+                 \PY{n}{num}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{v}\PY{p}{)}
+                 \PY{n}{xticks}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{i}\PY{p}{)}
+             
+             \PY{n}{y} \PY{o}{=} \PY{n}{num}
+             \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{y}\PY{p}{)}
+             \PY{n}{start}\PY{p}{,} \PY{n}{end} \PY{o}{=} \PY{n}{ax}\PY{o}{.}\PY{n}{get\PYZus{}xlim}\PY{p}{(}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{xaxis}\PY{o}{.}\PY{n}{set\PYZus{}ticks}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{n}{start}\PY{p}{,} \PY{n}{end}\PY{p}{,} \PY{l+m+mi}{300}\PY{p}{)}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{xaxis}\PY{o}{.}\PY{n}{set\PYZus{}major\PYZus{}formatter}\PY{p}{(}\PY{n}{ticker}\PY{o}{.}\PY{n}{FormatStrFormatter}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{\PYZpc{}0.1f}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xticklabels}\PY{p}{(}\PY{n}{xticks}\PY{p}{,} \PY{n}{rotation}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{vertical}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{fontsize}\PY{o}{=}\PY{l+m+mi}{8}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time and Date}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Number of Replies}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    Finding and analysing user interactions
+
+    Finding and analysing user interactions
+
+The initial list of replies, retweets, and mentions are found by
+selecting from the DataFrame. The replies are found by only keeping
+entities whose value for the '' field is not null; retweets are found by
+checking the 'text' field of an entity starts with "RT"; mentions are
+found by checking that the 'text' field of an entity contains an @
+symbol, and also that the requirements for replies and retweets both
+fail. This ensures retweets and replies are not counted as mentions. The
+retweetsToTwoUsers(), repliesToTwoUsers(), and mentionsToTwoUsers()
+methods are then used to convert the resultant variables retweets,
+replies, and mentions into 2D arrays of the usernames of both users
+involved in the interaction. A resultant list of all interactions is
+formed by concatenating all 3 formed arrays; the lengths of each list of
+interactions at each stage of processing are then analysed.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}26}]:} \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Finding user interactions.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         
+         \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
+         
+         \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
+         \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{replies}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ replies prior to processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ retweets prior to processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ mentions containing mentions prior to processing.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         
+         \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
+         \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
+         \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
+         
+         \PY{n}{interactions} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{concatenate}\PY{p}{(}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{,} \PY{n}{formattedMentions}\PY{p}{,} \PY{n}{formattedRetweets}\PY{p}{)}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+         
+         \PY{n}{retweets} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedRetweets}\PY{p}{)}
+         \PY{n}{replies} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{)}
+         \PY{n}{mentions} \PY{o}{=} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedMentions}\PY{p}{)}
+         
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{replies}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ replies after processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{retweets}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ retweets after processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{mentions}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ mentions after processing.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Note: a tweet containing \PYZgt{}0 mentions can contain \PYZgt{}1 mention.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         
+         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{There were }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{interactions}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ interactions in total after processing.}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-Analysing user interactions.
+Finding user interactions.
 
 There were 1723 replies prior to processing.
 There were 59998 retweets prior to processing.
@@ -544,35 +1024,114 @@ There were 53377 retweets after processing.
 There were 5972 mentions after processing.
 Note: a tweet containing >0 mentions can contain >1 mention.
 
-There were 55159 interactions in total after processing.
+There were 60990 interactions in total after processing.
 
 
 
     \end{Verbatim}
 
+    retweetsToTwoUsers() method
+
+The retweetsToTwoUsers() method takes in a DataFrame containing
+retweets, iterating over each entry (tweet). The user who sent the tweet
+is found from the 'from\_user' field. The user being retweeted is found
+by parsing the tweet text, in the 'text' field. Both usernames are then
+added to the list of interactions, as a sub-array. The list of
+interactions is returned after duplicates are removed from it.
+
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        
-        \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
-        
-        \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
-        \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        
-        \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
-        \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
-        \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
-        
-        \PY{n}{interactions} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{concatenate}\PY{p}{(}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{,} \PY{n}{formattedMentions}\PY{p}{,} \PY{n}{formattedRetweets}\PY{p}{)}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{interactions}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{interactions}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}27}]:} \PY{k}{def} \PY{n+nf}{retweetsToTwoUsers}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{data}\PY{p}{)}\PY{p}{:}
+             \PY{n}{interactions} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{k}{for} \PY{n}{index}\PY{p}{,} \PY{n}{row} \PY{o+ow}{in} \PY{n}{data}\PY{o}{.}\PY{n}{iterrows}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{sentBy} \PY{o}{=} \PY{n}{row}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{from\PYZus{}user}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+                 \PY{n}{tweetText} \PY{o}{=} \PY{n}{row}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+                 
+                 \PY{k}{if} \PY{n}{sentBy} \PY{o}{==} \PY{k+kc}{None} \PY{o+ow}{or} \PY{n}{tweetText} \PY{o}{==} \PY{k+kc}{None} \PY{o+ow}{or} \PY{n+nb}{type}\PY{p}{(}\PY{n}{tweetText}\PY{p}{)} \PY{o}{!=} \PY{n+nb}{str} \PY{o+ow}{or} \PY{n+nb}{type}\PY{p}{(}\PY{n}{sentBy}\PY{p}{)} \PY{o}{!=} \PY{n+nb}{str}\PY{p}{:} \PY{k}{continue}
+                 \PY{n}{splitText} \PY{o}{=} \PY{n}{tweetText}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{p}{)}
+                 \PY{k}{if} \PY{n+nb}{len}\PY{p}{(}\PY{n}{splitText}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{l+m+mi}{2}\PY{p}{:} \PY{k}{continue}
+                 
+                 \PY{n}{retweeting} \PY{o}{=} \PY{n}{splitText}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{:}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+                 \PY{n}{interactions}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{[}\PY{n}{sentBy}\PY{p}{,} \PY{n}{retweeting}\PY{p}{]}\PY{p}{)}
+             
+             \PY{k}{return} \PY{n}{DataFrame}\PY{p}{(}\PY{n}{interactions}\PY{p}{)}\PY{o}{.}\PY{n}{drop\PYZus{}duplicates}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    repliesToTwoUsers() method
+
+The repliesToTwoUsers() method is largely the same as
+retweetsToTwoUsers(). The second user is now the user being replied to,
+and is found from the 'in\_reply\_to\_screen\_name' field.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}28}]:} \PY{k}{def} \PY{n+nf}{repliesToTwoUsers}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{data}\PY{p}{)}\PY{p}{:}
+             \PY{n}{interactions} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{k}{for} \PY{n}{index}\PY{p}{,} \PY{n}{row} \PY{o+ow}{in} \PY{n}{data}\PY{o}{.}\PY{n}{iterrows}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{sentBy} \PY{o}{=} \PY{n}{row}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{from\PYZus{}user}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+                 \PY{n}{inReplyTo} \PY{o}{=} \PY{n}{row}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+                 \PY{k}{if} \PY{n}{sentBy} \PY{o}{==} \PY{k+kc}{None} \PY{o+ow}{or} \PY{n}{inReplyTo} \PY{o}{==} \PY{k+kc}{None} \PY{o+ow}{or} \PY{n+nb}{type}\PY{p}{(}\PY{n}{sentBy}\PY{p}{)} \PY{o}{!=} \PY{n+nb}{str} \PY{o+ow}{or} \PY{n+nb}{type}\PY{p}{(}\PY{n}{inReplyTo}\PY{p}{)} \PY{o}{!=} \PY{n+nb}{str}\PY{p}{:} \PY{k}{continue}
+                 \PY{n}{interactions}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{[}\PY{n}{sentBy}\PY{p}{,} \PY{n}{inReplyTo}\PY{p}{]}\PY{p}{)}
+             \PY{k}{return} \PY{n}{DataFrame}\PY{p}{(}\PY{n}{interactions}\PY{p}{)}\PY{o}{.}\PY{n}{drop\PYZus{}duplicates}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    mentionsToTwoUsers() method
+
+The mentionsToTwoUsers() method is largely the same as
+retweetsToTwoUsers(). There are now potentially more than one second
+users for each first user, as a tweet sent by a single user can mention
+multiple other users. The twitter text, from the 'text' field, is
+therefore parsed for @ symbols; the username is extracted as the text
+after each @ symbol and before the next whitespace character. Each
+username mentioned is then added to the list of interactions alongside
+the user who sent the tweet.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}29}]:} \PY{k}{def} \PY{n+nf}{mentionsToTwoUsers}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{data}\PY{p}{)}\PY{p}{:}
+             \PY{n}{interactions} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{k}{for} \PY{n}{index}\PY{p}{,} \PY{n}{row} \PY{o+ow}{in} \PY{n}{data}\PY{o}{.}\PY{n}{iterrows}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{sentBy} \PY{o}{=} \PY{n}{row}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{from\PYZus{}user}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+                 \PY{n}{tweetText} \PY{o}{=} \PY{n}{row}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+                 
+                 \PY{k}{if} \PY{n}{sentBy} \PY{o}{==} \PY{k+kc}{None} \PY{o+ow}{or} \PY{n}{tweetText} \PY{o}{==} \PY{k+kc}{None} \PY{o+ow}{or} \PY{n+nb}{type}\PY{p}{(}\PY{n}{tweetText}\PY{p}{)} \PY{o}{!=} \PY{n+nb}{str} \PY{o+ow}{or} \PY{n+nb}{type}\PY{p}{(}\PY{n}{sentBy}\PY{p}{)} \PY{o}{!=} \PY{n+nb}{str}\PY{p}{:} \PY{k}{continue}
+                 \PY{n}{splitText} \PY{o}{=} \PY{n}{tweetText}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{p}{)}
+                 \PY{k}{if} \PY{n+nb}{len}\PY{p}{(}\PY{n}{splitText}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{l+m+mi}{1}\PY{p}{:} \PY{k}{continue}
+                 \PY{k}{else}\PY{p}{:}
+                     \PY{k}{for} \PY{n}{string} \PY{o+ow}{in} \PY{n}{splitText}\PY{p}{:}
+                         \PY{k}{if} \PY{p}{(}\PY{n}{string}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{)}\PY{p}{:}
+                             \PY{n}{interactions}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{[}\PY{n}{sentBy}\PY{p}{,} \PY{n}{string}\PY{p}{]}\PY{p}{)}
+         
+             \PY{k}{return} \PY{n}{DataFrame}\PY{p}{(}\PY{n}{interactions}\PY{p}{)}\PY{o}{.}\PY{n}{drop\PYZus{}duplicates}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    Network graph of all interactions
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}30}]:} \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         
+         \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
+         
+         \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
+         \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         
+         \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
+         \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
+         \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
+         
+         \PY{n}{interactions} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{concatenate}\PY{p}{(}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{,} \PY{n}{formattedMentions}\PY{p}{,} \PY{n}{formattedRetweets}\PY{p}{)}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+         
+         \PY{c+c1}{\PYZsh{} above code previously explained in the \PYZdq{}Finding and analysing user interactions\PYZdq{} section}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{interactions}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{interactions}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -581,55 +1140,192 @@ Now drawing the graph showing all interactions between users.
 
     \end{Verbatim}
 
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_61_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        
-        \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
-        
-        \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
-        \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        
-        \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
-        \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
-        \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{formattedRetweets}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{retweets}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{replies}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{formattedMentions}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mentions}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+Graph density = 2.5182130445852386e-05
+
+    \end{Verbatim}
+
+    The networkGraph() method
+
+The networkgraph() method uses networkx, imported as nx. It first
+performs a print statement informing the user of what the graph
+represents, before generating and displaying the graph. The list of
+username pairs in the DataFrame given are iterated over, and an edge is
+added between each pair.The width of the lines are adjusted to best
+display the connections between nodes for particular inputs (found by
+trial and error). The parameters are then passed to generate and then
+display the graph, before some properties of the graph, found with
+library functions, are printed.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}31}]:} \PY{k}{def} \PY{n+nf}{networkGraph}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{plotItemList}\PY{p}{,} \PY{n}{whatPlotting}\PY{p}{)}\PY{p}{:}
+             \PY{n}{G} \PY{o}{=} \PY{n}{nx}\PY{o}{.}\PY{n}{DiGraph}\PY{p}{(}\PY{p}{)}
+         
+             \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Now drawing the graph showing all }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n}{whatPlotting} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ between users.}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         
+             \PY{k}{if} \PY{p}{(}\PY{n}{whatPlotting} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{interactions}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{:} \PY{n}{plotItemList} \PY{o}{=} \PY{n}{DataFrame}\PY{p}{(}\PY{n}{plotItemList}\PY{p}{)}
+         
+             \PY{k}{for} \PY{n}{index}\PY{p}{,} \PY{n}{row} \PY{o+ow}{in} \PY{n}{plotItemList}\PY{o}{.}\PY{n}{iterrows}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{G}\PY{o}{.}\PY{n}{add\PYZus{}edge}\PY{p}{(}\PY{n}{row}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{row}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+             \PY{n}{UG} \PY{o}{=} \PY{n}{G}\PY{o}{.}\PY{n}{to\PYZus{}undirected}\PY{p}{(}\PY{p}{)}
+         
+             \PY{n}{width} \PY{o}{=} \PY{l+m+mf}{0.003}
+             \PY{k}{if} \PY{p}{(}\PY{n}{whatPlotting} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{replies}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{:} \PY{n}{width} \PY{o}{=} \PY{l+m+mf}{0.4}
+             \PY{k}{if} \PY{p}{(}\PY{n}{whatPlotting} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mentions}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{:} \PY{n}{width} \PY{o}{=} \PY{l+m+mf}{0.07}
+         
+             \PY{n}{options} \PY{o}{=} \PY{p}{\PYZob{}}
+                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{node\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{black}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{node\PYZus{}size}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,}
+                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{line\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{grey}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{linewidths}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,}
+                 \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{width}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{width}\PY{p}{,}
+             \PY{p}{\PYZcb{}}
+         
+             \PY{n}{nx}\PY{o}{.}\PY{n}{draw\PYZus{}circular}\PY{p}{(}\PY{n}{UG}\PY{p}{,} \PY{o}{*}\PY{o}{*}\PY{n}{options}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+             \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Graph density = }\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{nx}\PY{o}{.}\PY{n}{density}\PY{p}{(}\PY{n}{G}\PY{p}{)}\PY{p}{)}\PY{p}{)} \PY{c+c1}{\PYZsh{} TODO: print some more properties of the graph}
+             \PY{k}{if} \PY{p}{(}\PY{n}{whatPlotting} \PY{o}{!=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{interactions}\PY{l+s+s2}{\PYZdq{}} \PY{o+ow}{and} \PY{n}{whatPlotting} \PY{o}{!=} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mentions}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{:} \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+\end{Verbatim}
+
+
+    Network Graphs of Retweets, Replies, and Mentions
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}32}]:} \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         
+         \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
+         
+         \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
+         \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         
+         \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
+         \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
+         \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
+         
+         \PY{c+c1}{\PYZsh{} for code explanation see \PYZdq{}Network graph of all interactions\PYZdq{} section}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{formattedRetweets}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{retweets}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{replies}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{networkGraph}\PY{p}{(}\PY{n}{formattedMentions}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{mentions}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
-        \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        
-        \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
-        
-        \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
-        \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
-        
-        \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
-        \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
-        \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
-        
-        \PY{n}{interactions} \PY{o}{=} \PY{n}{formattedReplies} \PY{o}{+} \PY{n}{formattedRetweets} \PY{o}{+} \PY{n}{formattedMentions}
-        
-        \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plotter}\PY{o}{.}\PY{n}{interactionsPieChart}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedRetweets}\PY{p}{)}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{)}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedMentions}\PY{p}{)}\PY{p}{)}
+Now drawing the graph showing all retweets between users.
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_65_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Graph density = 2.692865021425508e-05
+
+
+
+Now drawing the graph showing all replies between users.
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_65_3.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Graph density = 0.000364948893811214
+
+
+
+Now drawing the graph showing all mentions between users.
+
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_65_5.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+Graph density = 0.00021895905282390816
+
+    \end{Verbatim}
+
+    Pie Chart Showing Make-up of Interactions By Interaction Type
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}33}]:} \PY{k+kn}{from} \PY{n+nn}{plotter} \PY{k}{import} \PY{o}{*}
+         \PY{k+kn}{from} \PY{n+nn}{parsing} \PY{k}{import} \PY{o}{*}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         
+         \PY{n}{data} \PY{o}{=} \PY{n}{CensusReader}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{data/CometLanding\PYZus{}refined.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{data}
+         
+         \PY{n}{replies} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)}\PY{p}{]}
+         \PY{n}{retweets} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{n}{data}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{@}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{True}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=}  \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{in\PYZus{}reply\PYZus{}to\PYZus{}screen\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{notnull}\PY{p}{(}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         \PY{n}{mentions} \PY{o}{=} \PY{n}{mentions}\PY{p}{[}\PY{n}{mentions}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{text}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{startswith}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{RT}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{==} \PY{k+kc}{False}\PY{p}{]}
+         
+         \PY{n}{formattedRetweets} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{retweetsToTwoUsers}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}
+         \PY{n}{formattedReplies} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{repliesToTwoUsers}\PY{p}{(}\PY{n}{replies}\PY{p}{)}
+         \PY{n}{formattedMentions} \PY{o}{=} \PY{n}{plotter}\PY{o}{.}\PY{n}{mentionsToTwoUsers}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}
+         
+         \PY{c+c1}{\PYZsh{} for explanation of above code, see \PYZdq{}Finding and analysing user interactions\PYZdq{} section}
+         
+         \PY{n}{plotter} \PY{o}{=} \PY{n}{Plotter}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plotter}\PY{o}{.}\PY{n}{interactionsPieChart}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedRetweets}\PY{p}{)}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedReplies}\PY{p}{)}\PY{p}{,} \PY{n+nb}{len}\PY{p}{(}\PY{n}{formattedMentions}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_67_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    interactionsPieChart() method
+
+The interactionsPieChart() method takes in the number of retweets,
+replies, and mentions. It then calculates the percentage shares of each
+interaction type, out of all interactions. It then generates the labels
+for each type of interaction that include its percentage share of all
+interactions. These arguments are then passed into various functions
+from plt (matplotlib.pyplot) to generate the pie chart, before it is
+given a title and then displayed.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}34}]:} \PY{k}{def} \PY{n+nf}{interactionsPieChart}\PY{p}{(}\PY{n+nb+bp}{self}\PY{p}{,} \PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{,} \PY{n}{mentions}\PY{p}{)}\PY{p}{:}
+             \PY{n}{total} \PY{o}{=} \PY{n}{retweets} \PY{o}{+} \PY{n}{replies} \PY{o}{+} \PY{n}{mentions}
+             \PY{c+c1}{\PYZsh{} The slices will be ordered and plotted counter\PYZhy{}clockwise.}
+             \PY{n}{percents} \PY{o}{=} \PY{p}{[}\PY{p}{(}\PY{n+nb}{float}\PY{p}{(}\PY{n}{retweets}\PY{p}{)}\PY{o}{/}\PY{n+nb}{float}\PY{p}{(}\PY{n}{total}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100.0}\PY{p}{)}\PY{p}{,} \PY{p}{(}\PY{n+nb}{float}\PY{p}{(}\PY{n}{replies}\PY{p}{)}\PY{o}{/}\PY{n+nb}{float}\PY{p}{(}\PY{n}{total}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100.0}\PY{p}{)}\PY{p}{,}\PY{p}{(}\PY{n+nb}{float}\PY{p}{(}\PY{n}{mentions}\PY{p}{)}\PY{o}{/}\PY{n+nb}{float}\PY{p}{(}\PY{n}{total}\PY{p}{)}\PY{o}{*}\PY{l+m+mf}{100.0}\PY{p}{)}\PY{p}{]}
+             
+             \PY{n}{labels} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Retweets (}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{percents}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Replies (}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{percents}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mentions (}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{percents}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{)} \PY{o}{+} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{)}\PY{l+s+s1}{\PYZsq{}}
+             \PY{n}{fracs} \PY{o}{=} \PY{p}{[}\PY{n}{retweets}\PY{p}{,} \PY{n}{replies}\PY{p}{,} \PY{n}{mentions}\PY{p}{]}
+             \PY{n}{colors} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsh{}ff4d4d}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsh{}0FAC36}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsh{}0F18AC}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} red, green, blue}
+         
+             \PY{n}{patches}\PY{p}{,} \PY{n}{texts} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{pie}\PY{p}{(}\PY{n}{fracs}\PY{p}{,} \PY{n}{colors}\PY{o}{=}\PY{n}{colors}\PY{p}{,} \PY{n}{shadow}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{startangle}\PY{o}{=}\PY{l+m+mi}{90}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{n}{patches}\PY{p}{,} \PY{n}{labels}\PY{p}{,} \PY{n}{loc}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{best}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{axis}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{equal}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         
+             \PY{n}{plt}\PY{o}{.}\PY{n}{tight\PYZus{}layout}\PY{p}{(}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Pie Chart Showing Frequencies of Different Interaction Types}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
