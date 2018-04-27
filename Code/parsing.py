@@ -109,9 +109,8 @@ class CensusReader:
         import operator
         sortPlat= sorted(platforms.items(), key=operator.itemgetter(1), reverse=True)
         
-        
         returnString = "Top Platforms used \n"
         for m in range(0,20):
-            returnString += str(m + 1) + ". " + str(sortPlat[m]) + "\n"
+            returnString += (str(m + 1) + ". " + str(sortPlat[m]) + "\n").replace("(", "").replace(")", "")
         return returnString
     
