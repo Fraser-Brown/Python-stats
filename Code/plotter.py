@@ -162,32 +162,64 @@ class Plotter:
             interactions.append([sentBy, retweeting])
 
         return DataFrame(interactions).drop_duplicates()
-    
-    def getInteractionUsers(self, data):
-        replies = data[data['in_reply_to_screen_name'].notnull()]
-        retweets = data[data['text'].str.startswith("RT") == True]
 
-        formattedRetweets = self.retweetsToTwoUsers(retweets)
-        formattedReplies = self.repliesToTwoUsers(replies)
-
-        all = formattedReplies + formattedRetweets
-        return DataFrame(all).drop_duplicates()
-    
-    def networkGraph(self, data):
-        G = nx.DiGraph()
-        interactionUsers = self.getInteractionUsers(data)
-
+    def mentionsToTwoUsers(self, data):
+        interactions = []
         for index, row in data.iterrows():
+            sentBy = row['from_user']
+            tweetText = row['text']
+
+            if sentBy == None or tweetText == None or type(tweetText) != str or type(sentBy) != str: continue
+            splitText = tweetText.split()
+            if len(splitText) < 1: continue
+            else:
+                for string in splitText:
+                    if (string.startswith("@")):
+                        interactions.append([sentBy, string])
+
+        return DataFrame(interactions).drop_duplicates()
+    
+    def networkGraph(self, plotItemList, whatPlotting):
+        G = nx.DiGraph()
+
+        print("Now drawing the graph showing all " + whatPlotting + " between users.")
+
+        if (whatPlotting == "interactions"): plotItemList = DataFrame(plotItemList)
+
+        for index, row in plotItemList.iterrows():
             G.add_edge(row[0], row[1])
         UG = G.to_undirected()
+
+        width = 0.003
+        if (whatPlotting == "replies"): width = 0.4
+        if (whatPlotting == "mentions"): width = 0.07
 
         options = {
             'node_color': 'black',
             'node_size': 1,
             'line_color': 'grey',
             'linewidths': 0,
-            'width': 0.1,
+            'width': width,
         }
 
         nx.draw_circular(UG, **options)
+        plt.show()
+        print("Graph density = " + str(nx.density(G))) # TODO: print some more properties of the graph
+        if (whatPlotting != "interactions" and whatPlotting != "mentions"): print("\n\n")
+
+    def interactionsPieChart(self, retweets, replies, mentions):
+        total = retweets + replies + mentions
+        # The slices will be ordered and plotted counter-clockwise.
+        percents = [(float(retweets)/float(total)*100.0), (float(replies)/float(total)*100.0),(float(mentions)/float(total)*100.0)]
+
+        labels = 'Retweets (' + str(percents[0]) + '%)', 'Replies (' + str(percents[1]) + '%)', 'Mentions (' + str(percents[2]) + '%)'
+        fracs = [retweets, replies, mentions]
+        colors = ['#ff4d4d', '#0FAC36', '#0F18AC'] # red, green, blue
+
+        patches, texts = plt.pie(fracs, colors=colors, shadow=True, startangle=90)
+        plt.legend(patches, labels, loc="best")
+        plt.axis('equal')
+
+        plt.tight_layout()
+        plt.title('Pie Chart Showing Frequencies of Different Interaction Types')
         plt.show()
