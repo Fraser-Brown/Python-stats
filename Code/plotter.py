@@ -42,16 +42,6 @@ class Plotter:
 
         plt.show()
 
-        # fig.set_xlabel('Activity')
-        # fig.set_ylabel('Frequency (absolute)')
-        # fig.set_title('Comparing absolute frequencies of activities')
-        # fig.set_xticks(n_groups + bar_width)
-        # fig.set_xticklabels(('Tweets', 'Retweets', 'Replies'))
-        # fig.legend()
-
-        # fig.tight_layout()
-        # plt.show()
-
     def tweetsTimeLine(self, data):
         tweets = data[data['text'].str.startswith("RT") == False]
         groupbytime = tweets.groupby('time').count()

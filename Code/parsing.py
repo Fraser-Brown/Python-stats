@@ -80,11 +80,21 @@ class CensusReader:
             hTagsAndCounts.append([ht, count])
         return hTagsAndCounts
 
-    def mostPopHashtags(self, number):
+    def mostPopHashtags(self, number, excludeCometLanding):
         sortedHTagsAndCounts = sorted(self.getHTagsAndCounts(), key = itemgetter(1), reverse=True)
         returnString = ""
+        
+        if excludeCometLanding:
+            max = number - 1
+            x = 0
+            while x < max:
+                if sortedHTagsAndCounts[x][0].lower() == "cometlanding":
+                    del sortedHTagsAndCounts[x]
+                else: x += 1
+        
         for x in range(0,number):
-            returnString += str(x + 1) + ". #" + sortedHTagsAndCounts[x][0] + " : " + str(sortedHTagsAndCounts[x][1]) + " tweets (of any type)\n"
+            returnString += str(x + 1) + ". #" + sortedHTagsAndCounts[x][0] + " : " + str(sortedHTagsAndCounts[x][1]) + " tweets\n"
+        
         return returnString
     
     def appUsed(self):
